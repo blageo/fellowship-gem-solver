@@ -1,0 +1,21 @@
+{
+  "name": "prodgemsolver",
+  "version": "1.0.0",
+  "description": "Fellowship (EAS3) gem fusion cost solver — static web app (highs-js).",
+  "main": "solver.js",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "parity": "node tools/parity.mjs --n 500 --seed 12345",
+    "browser-check": "node tools/browser_check.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "highs": "^1.14.2"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}
