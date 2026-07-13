@@ -43,6 +43,7 @@ python3 -m http.server 8000
 | `gear-upgrade-cost.js` | pure calculator: current + target `GearItem` → expected `UpgradeCost` |
 | `gear-builds-store.js` | localStorage persistence for named `GearBuild`s |
 | `tools/gear_test.mjs` | regression checks for the gear upgrade cost calculator (`npm run gear-test`) |
+| `tools/gear_browser_check.mjs` | Playwright end-to-end check for gear.html (`npm run gear-browser-check`) |
 
 ## Shareable builds
 
