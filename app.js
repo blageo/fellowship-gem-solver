@@ -55,6 +55,27 @@ function setInputs(which, entries) {
   }
 }
 
+// --- keyboard navigation --------------------------------------------------
+// Arrow keys move focus between grid cells within the same panel (target or have).
+// Left/Right crosses tiers; Up/Down crosses colours. Tab/Enter keep default behaviour.
+function addKeyboardNav(which) {
+  for (let ci = 0; ci < COLORS.length; ci++) {
+    for (let ti = 0; ti < TIERS.length; ti++) {
+      const el = document.getElementById(`${which}_${COLORS[ci]}_${TIERS[ti]}`);
+      el.addEventListener("keydown", (e) => {
+        let nc = ci, nt = ti;
+        if (e.key === "ArrowRight")      nt = Math.min(ti + 1, TIERS.length - 1);
+        else if (e.key === "ArrowLeft")  nt = Math.max(ti - 1, 0);
+        else if (e.key === "ArrowDown")  nc = Math.min(ci + 1, COLORS.length - 1);
+        else if (e.key === "ArrowUp")    nc = Math.max(ci - 1, 0);
+        else return;
+        e.preventDefault();
+        document.getElementById(`${which}_${COLORS[nc]}_${TIERS[nt]}`).focus();
+      });
+    }
+  }
+}
+
 function clearAll() {
   document.querySelectorAll("input[type=number]").forEach((i) => (i.value = ""));
   document.getElementById("freeSmalls").checked = false;
@@ -224,6 +245,8 @@ async function copyShareLink() {
 // --- boot -----------------------------------------------------------------
 buildGrid("target");
 buildGrid("have");
+addKeyboardNav("target");
+addKeyboardNav("have");
 document.getElementById("version").textContent = `${SEASON} · patch ${PATCH}`;
 document.getElementById("clearBtn").addEventListener("click", clearAll);
 const hasTarget = hydrateFromURL();
