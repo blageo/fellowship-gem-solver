@@ -265,6 +265,7 @@ function render(p) {
     h += '<div class="line muted" style="margin-top:4px">Seed Smalls needed (1 each to start budding): '
        + r.seed_smalls.join(", ") + "</div>";
   }
+  h += '<div class="sharebar" style="margin-top:10px"><a id="copyListLink">📋 Copy shopping list</a><span id="listCopied"></span></div>';
   h += "</div>";
 
   if (p.smalls.length) {
@@ -321,6 +322,45 @@ function render(p) {
 
   document.getElementById("out").innerHTML = h;
   document.getElementById("shareLink").addEventListener("click", copyShareLink);
+  document.getElementById("copyListLink").addEventListener("click", () => copyShoppingList(p));
+}
+
+function buildShoppingListText(p) {
+  const r = p.resources;
+  const lines = [`Fellowship Gem Plan — ${p.total_marks} Marks`, ""];
+  lines.push("Buy at vendor:");
+  const add = (name, n) => { if (n) lines.push(`  ${name} ×${n}`); };
+  add("Unstable Aether", r.unstable.total);
+  add("Imbued Aether", r.imbued.total);
+  add("Arcane Aether", r.arcane.total);
+  add("Defender's Godstone", r.godstones.defender);
+  add("Hero's Godstone", r.godstones.hero);
+  add("Legend's Godstone", r.godstones.legend);
+  lines.push(`  = ${r.marks} Marks of Fellowship`);
+  if (p.smalls.length) {
+    lines.push("");
+    lines.push("Small gems to bud/farm:");
+    for (const s of p.smalls) lines.push(`  ${s.color}: ${s.to_get} to get (${s.owned} owned)`);
+  }
+  if (Object.keys(r.farm_smalls || {}).length) {
+    lines.push("");
+    lines.push("Farm smalls: " + Object.entries(r.farm_smalls).map(([c, n]) => `${n} ${c}`).join(", "));
+  }
+  return lines.join("\n");
+}
+
+async function copyShoppingList(p) {
+  const text = buildShoppingListText(p);
+  const note = document.getElementById("listCopied");
+  try {
+    await navigator.clipboard.writeText(text);
+    note.textContent = "copied!";
+    note.className = "copied";
+  } catch {
+    note.textContent = "(copy failed)";
+    note.className = "muted";
+  }
+  setTimeout(() => { note.textContent = ""; }, 2500);
 }
 
 async function copyShareLink() {
