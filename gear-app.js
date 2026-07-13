@@ -4,7 +4,7 @@
 // — this is pure arithmetic, so there's no HiGHS/WASM dependency.
 import {
   SEASON, PATCH, ITEM_SLOTS, ITEM_TYPES, RARITIES, LEAGUES,
-  RANDOM_STAT_TYPES, MODIFIER_CATEGORIES, RARITY_UNLOCKS,
+  RANDOM_STAT_TYPES, MODIFIER_CATEGORIES, MODIFIER_NAMES, RARITY_UNLOCKS,
 } from "./gear-constants.js";
 import { makeGearItem, makeTargetGearItem } from "./gear-model.js";
 import { computeUpgradeCost } from "./gear-upgrade-cost.js";
@@ -70,6 +70,50 @@ function renderStatCheckboxes(containerId, prefix) {
 }
 
 // --- modifier slot rows --------------------------------------------------
+// The modifier-id field depends on the row's chosen category: categories with
+// a known named pool (MODIFIER_NAMES) get a dropdown of that pool; categories
+// without one (setBonus/weaponAbility/relicAbility — each set/weapon/relic
+// has its own fixed, open-ended ability name) get free text; no category
+// chosen yet gets a disabled placeholder. The element is swapped (not just
+// repopulated) so callers can keep reading/writing it as `${prefix}_modid_${i}`
+// via plain `.value` regardless of which tag is currently there.
+function buildModifierIdField(prefix, i, category) {
+  const id = `${prefix}_modid_${i}`;
+  let el;
+  if (!category) {
+    el = document.createElement("input");
+    el.type = "text";
+    el.disabled = true;
+    el.placeholder = "(pick a category)";
+  } else if (MODIFIER_NAMES[category]) {
+    el = document.createElement("select");
+    const blank = document.createElement("option");
+    blank.value = "";
+    blank.textContent = prefix === "cur" ? "— choose —" : "— any —";
+    el.appendChild(blank);
+    for (const name of MODIFIER_NAMES[category]) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      el.appendChild(opt);
+    }
+  } else {
+    el = document.createElement("input");
+    el.type = "text";
+    el.placeholder = "ability/bonus name (free text)";
+    el.maxLength = 60;
+  }
+  el.id = id;
+  return el;
+}
+
+function rebuildModifierIdField(prefix, i, category) {
+  const old = document.getElementById(`${prefix}_modid_${i}`);
+  const fresh = buildModifierIdField(prefix, i, category);
+  old.replaceWith(fresh);
+  return fresh;
+}
+
 function renderModifierRows(containerId, prefix) {
   const box = document.getElementById(containerId);
   box.innerHTML = "";
@@ -89,14 +133,14 @@ function renderModifierRows(containerId, prefix) {
       opt.textContent = cat;
       catSelect.appendChild(opt);
     }
+    catSelect.addEventListener("change", () => {
+      rebuildModifierIdField(prefix, i, catSelect.value);
+      if (prefix === "cur") applyLocks();
+    });
 
-    const idInput = document.createElement("input");
-    idInput.type = "text";
-    idInput.id = `${prefix}_modid_${i}`;
-    idInput.placeholder = "modifier id (optional)";
-    idInput.maxLength = 60;
+    const idField = buildModifierIdField(prefix, i, "");
 
-    row.append(`Slot ${i + 1}: `, catSelect, idInput);
+    row.append(`Slot ${i + 1}: `, catSelect, idField);
     box.appendChild(row);
   }
 }
@@ -115,12 +159,18 @@ function applyLocks() {
   for (let i = 0; i < MAX_MODIFIER_SLOTS; i++) {
     const beyondRarity = i >= unlock.modifierSlots;
     const cat = document.getElementById(`cur_modcat_${i}`);
-    const idEl = document.getElementById(`cur_modid_${i}`);
     const row = cat.closest(".modslot-row");
     row.classList.toggle("locked", beyondRarity);
-    idEl.disabled = beyondRarity;
-    if (i === 0 && lockedCategory) cat.value = lockedCategory;
+    if (i === 0 && lockedCategory && cat.value !== lockedCategory) {
+      cat.value = lockedCategory;
+      rebuildModifierIdField("cur", i, lockedCategory);
+    }
     cat.disabled = beyondRarity || (i === 0 && !!lockedCategory);
+    // The id field is disabled whenever its row is beyond the current rarity,
+    // or whenever no category is chosen at all (nothing to pick an id for) —
+    // re-derive both instead of trusting whatever the field's .disabled
+    // happened to be (it gets replaced wholesale on category change).
+    document.getElementById(`cur_modid_${i}`).disabled = beyondRarity || !cat.value;
   }
   // Random stat *count* is capped by rarity (1 below yellow, 2 at/above), but
   // any of the 6 types can be that roll — there's no positional mapping like
@@ -156,9 +206,9 @@ function gatherModifierRows(prefix) {
 function setModifierRows(prefix, rows) {
   for (let i = 0; i < MAX_MODIFIER_SLOTS; i++) {
     const cat = document.getElementById(`${prefix}_modcat_${i}`);
-    const idEl = document.getElementById(`${prefix}_modid_${i}`);
     const entry = rows[i];
     if (!cat.disabled) cat.value = entry ? entry.category : "";
+    const idEl = rebuildModifierIdField(prefix, i, cat.value);
     idEl.value = entry?.modifierId || "";
   }
 }
@@ -206,6 +256,9 @@ function loadSlotIntoForm(slot) {
   setModifierRows("cur", current.modifierSlots);
   setStats("tgt", target.randomStats);
   setModifierRows("tgt", target.modifierSlots);
+  applyLocks(); // setModifierRows("cur", ...) replaces the id-field DOM nodes,
+                // which drops the disabled state the first applyLocks() call
+                // gave them — reapply now that the real elements are in place.
   updateWeaponNeckNote(slot);
 }
 

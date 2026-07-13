@@ -1,5 +1,7 @@
 // Fellowship gear/itemization constants — edit this file when the game updates
 // costs, pool sizes, or adds new categories. Same pattern as game-constants.js.
+import { COLORS } from "./game-constants.js";
+
 export const SEASON = "EAS3";
 export const PATCH = "0.4.2";
 
@@ -42,6 +44,37 @@ export const MODIFIER_CATEGORIES = {
 // locked slot-1 categories, which can never be targeted by any reroll).
 export const REROLLABLE_CATEGORIES = Object.keys(MODIFIER_CATEGORIES)
   .filter((c) => !MODIFIER_CATEGORIES[c].locked);
+
+// Named pools for the categories with a known, fixed roster of outcomes.
+// setBonus/weaponAbility/relicAbility have no pool here — each set/weapon/
+// relic has its own single fixed ability, an open-ended list we don't track.
+export const MODIFIER_NAMES = {
+  majorTrait: [
+    "Amethyst Splinters", "Brave Machinations", "Diamond Strike", "Emerald Judgement",
+    "Heroic Brand", "Martial Initiative", "Ruby Storm", "Sapphire Aurastone", "Visions of Grandeur",
+  ],
+  heroicTrait: [
+    "Hidden Power", "Hunter's Focus", "Inspired Allegiance", "Kindling",
+    "Navigator's Intuition", "Patient Soul", "Seized Opportunity", "Vengeful Soul", "Willful Momentum",
+  ],
+  defensiveTrait: [
+    "Divine Mediation", "First Man Standing", "Grounded Spirit", "Heart of Stone", "Iron Spikes",
+    "King of the Hill", "Latent Resurgence", "Stalwart Readiness", "Treasure Hunter's Delight",
+  ],
+  blessing: [
+    "The Celestial", "The Herald", "The Heretic", "The Intrepid", "The Monarch", "The Mystic",
+    "The Philosopher", "The Sinister", "The Subduer", "The Trickster", "The Usurper",
+    "The Vainglorious", "The Vehement", "The Wayfarer",
+  ],
+  gemEssence: COLORS,           // +100 Gem Power in one gem colour per slot
+  bonusStat: RANDOM_STAT_TYPES, // "same types as random stats"
+};
+
+for (const [cat, names] of Object.entries(MODIFIER_NAMES)) {
+  if (names.length !== MODIFIER_CATEGORIES[cat].poolSize) {
+    throw new Error(`MODIFIER_NAMES.${cat} has ${names.length} names, expected poolSize ${MODIFIER_CATEGORIES[cat].poolSize}`);
+  }
+}
 
 // How many modifier slots + random stats are unlocked at each rarity, and
 // whether the newly-added slot/stat "floods" (duplicates the prior one)
@@ -106,3 +139,14 @@ export const NECK_ATTUNEMENT_ROWS = 2;
 export const NECK_ATTUNEMENT_OPTIONS_PER_ROW = 2;
 // Reroll cost is unresearched — left null on purpose (see EXPANSION notes).
 export const NECK_ATTUNEMENT_REROLL_COST = null;
+
+// Named pool, recorded now for a future neck attunement picker UI (not built
+// yet — see gear.html's "not yet supported" note on the neck slot).
+export const NECK_ATTUNEMENT_NAMES = [
+  "The Bat", "The Boar", "The Dragon", "The Gryphon", "The Lake", "The Mountain",
+  "The Oak", "The River", "The Stag", "The Viper", "The Wolf",
+];
+
+if (NECK_ATTUNEMENT_NAMES.length !== NECK_ATTUNEMENT_POOL_SIZE) {
+  throw new Error(`NECK_ATTUNEMENT_NAMES has ${NECK_ATTUNEMENT_NAMES.length} names, expected ${NECK_ATTUNEMENT_POOL_SIZE}`);
+}
