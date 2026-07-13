@@ -55,6 +55,67 @@ function setInputs(which, entries) {
   }
 }
 
+// --- named build slots (localStorage) ------------------------------------
+const BUILDS_KEY = "fellowship-gem-solver:builds";
+
+function loadBuilds() {
+  try { return JSON.parse(localStorage.getItem(BUILDS_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveBuilds(builds) {
+  localStorage.setItem(BUILDS_KEY, JSON.stringify(builds));
+}
+
+function refreshBuildSelect() {
+  const sel = document.getElementById("savedBuilds");
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— saved builds —</option>';
+  for (const b of loadBuilds()) {
+    const opt = document.createElement("option");
+    opt.value = b.name;
+    opt.textContent = b.name;
+    sel.appendChild(opt);
+  }
+  if (prev) sel.value = prev;
+}
+
+function saveBuild() {
+  const name = document.getElementById("buildName").value.trim();
+  if (!name) return;
+  const builds = loadBuilds().filter((b) => b.name !== name);
+  builds.unshift({
+    name,
+    target: gather("target"),
+    have: gather("have"),
+    free: document.getElementById("freeSmalls").checked,
+    fewest: document.getElementById("fewestClicks").checked,
+  });
+  saveBuilds(builds.slice(0, 20)); // cap at 20
+  refreshBuildSelect();
+  document.getElementById("savedBuilds").value = name;
+}
+
+function loadBuild() {
+  const name = document.getElementById("savedBuilds").value;
+  if (!name) return;
+  const build = loadBuilds().find((b) => b.name === name);
+  if (!build) return;
+  setInputs("target", build.target);
+  setInputs("have", build.have);
+  document.getElementById("freeSmalls").checked = build.free || false;
+  document.getElementById("fewestClicks").checked = build.fewest || false;
+  document.getElementById("buildName").value = name;
+}
+
+function deleteBuild() {
+  const name = document.getElementById("savedBuilds").value;
+  if (!name) return;
+  saveBuilds(loadBuilds().filter((b) => b.name !== name));
+  document.getElementById("buildName").value = "";
+  refreshBuildSelect();
+}
+
 // --- keyboard navigation --------------------------------------------------
 // Arrow keys move focus between grid cells within the same panel (target or have).
 // Left/Right crosses tiers; Up/Down crosses colours. Tab/Enter keep default behaviour.
@@ -247,6 +308,10 @@ buildGrid("target");
 buildGrid("have");
 addKeyboardNav("target");
 addKeyboardNav("have");
+refreshBuildSelect();
+document.getElementById("saveBuildBtn").addEventListener("click", saveBuild);
+document.getElementById("loadBuildBtn").addEventListener("click", loadBuild);
+document.getElementById("deleteBuildBtn").addEventListener("click", deleteBuild);
 document.getElementById("version").textContent = `${SEASON} · patch ${PATCH}`;
 document.getElementById("clearBtn").addEventListener("click", clearAll);
 const hasTarget = hydrateFromURL();

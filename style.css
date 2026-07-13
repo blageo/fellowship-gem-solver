@@ -25,8 +25,22 @@ input[type=number] {
   border-radius: 6px; font-size: 14px;
 }
 input[type=number]:focus { outline: none; border-color: #e8c877; }
+.builds-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: 22px 0 0; padding: 10px 14px; background: #16232f;
+  border: 1px solid #26384a; border-radius: 10px;
+}
+.builds-bar input[type=text] {
+  background: #0e1a24; color: #e6edf3; border: 1px solid #2c4257;
+  border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 160px;
+}
+.builds-bar input[type=text]:focus { outline: none; border-color: #e8c877; }
+.builds-bar select {
+  background: #0e1a24; color: #e6edf3; border: 1px solid #2c4257;
+  border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
 .controls { display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-            margin: 22px 0 4px; }
+            margin: 12px 0 4px; }
 label.opt { color: #b9c6d3; font-size: 14px; display: flex; align-items: center; gap: 8px; }
 button {
   background: #e8c877; color: #14202b; border: none; border-radius: 8px;

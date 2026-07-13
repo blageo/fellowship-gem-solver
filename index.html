@@ -15,6 +15,14 @@
     <div class="panel"><h2>Inventory — gems you own</h2><div id="grid-have" class="tablewrap"></div></div>
   </div>
 
+  <div class="builds-bar">
+    <input type="text" id="buildName" placeholder="Build name…" maxlength="40">
+    <button class="ghost" id="saveBuildBtn">Save build</button>
+    <select id="savedBuilds"><option value="">— saved builds —</option></select>
+    <button class="ghost" id="loadBuildBtn">Load</button>
+    <button class="ghost" id="deleteBuildBtn">Delete</button>
+  </div>
+
   <div class="controls">
     <label class="opt"><input type="checkbox" id="freeSmalls"> Treat Small gems as free (farmed, cost 0)</label>
     <label class="opt"><input type="checkbox" id="fewestClicks"> Fewest clicks (batch into triple/double buds)</label>
