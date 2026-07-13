@@ -36,7 +36,7 @@ try {
 
   // shared-build URL for Example 1 -> auto-solves on load
   const share = "?t=sapphire_flawless:2,ruby_flawless:1,emerald_splendid:4,topaz_large:3";
-  await page.goto(BASE + "/" + share, { waitUntil: "networkidle" });
+  await page.goto(BASE + "/gem.html" + share, { waitUntil: "networkidle" });
   await page.waitForSelector("#out .total", { timeout: 15000 });
 
   const total1 = (await page.textContent("#out .total")).trim();
