@@ -3,36 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fellowship Gem Fusion Solver</title>
+<title>Fellowship Tools</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Fellowship Gem Fusion Solver</h1>
-  <p class="sub">Enter what you want and what you already own. Empty = 0. Runs entirely in your browser.</p>
+  <h1>Fellowship Tools</h1>
+  <p class="sub">Minimum-cost planners for Fellowship (Early Access Season 3). Runs entirely in your browser.</p>
 
-  <div class="grids">
-    <div class="panel"><h2>Target — gems you want</h2><div id="grid-target" class="tablewrap"></div></div>
-    <div class="panel"><h2>Inventory — gems you own</h2><div id="grid-have" class="tablewrap"></div></div>
+  <div class="landing">
+    <a class="tool-card" href="gem.html">
+      <h2>Gem Fusion Solver</h2>
+      <p>Fuse, bud, and transmute gems to build a target loadout for the cheapest possible Marks cost.</p>
+    </a>
+    <a class="tool-card" href="gear.html">
+      <h2>Gear Upgrade Planner</h2>
+      <p>Work out the Souldust and Marks cost to upgrade a piece of gear to a target rarity, modifiers, and stats.</p>
+    </a>
   </div>
-
-  <div class="builds-bar">
-    <input type="text" id="buildName" placeholder="Build name…" maxlength="40">
-    <button class="ghost" id="saveBuildBtn">Save build</button>
-    <select id="savedBuilds"><option value="">— saved builds —</option></select>
-    <button class="ghost" id="loadBuildBtn">Load</button>
-    <button class="ghost" id="deleteBuildBtn">Delete</button>
-  </div>
-
-  <div class="controls">
-    <label class="opt"><input type="checkbox" id="freeSmalls"> Treat Small gems as free (farmed, cost 0)</label>
-    <label class="opt"><input type="checkbox" id="fewestClicks"> Fewest clicks (batch into triple/double buds)</label>
-    <button id="calcBtn" disabled>Loading solver…</button>
-    <button class="ghost" id="clearBtn">Clear</button>
-  </div>
-
-  <div id="out"></div>
 
   <footer><span id="version"></span></footer>
-  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { SEASON, PATCH } from "./game-constants.js";
+    document.getElementById("version").textContent = `${SEASON} · patch ${PATCH}`;
+  </script>
 </body>
 </html>

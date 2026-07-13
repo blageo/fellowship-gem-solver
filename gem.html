@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fellowship Gem Fusion Solver</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="back-link" href="index.html">&larr; All tools</a>
+  <h1>Fellowship Gem Fusion Solver</h1>
+  <p class="sub">Enter what you want and what you already own. Empty = 0. Runs entirely in your browser.</p>
+
+  <div class="grids">
+    <div class="panel"><h2>Target — gems you want</h2><div id="grid-target" class="tablewrap"></div></div>
+    <div class="panel"><h2>Inventory — gems you own</h2><div id="grid-have" class="tablewrap"></div></div>
+  </div>
+
+  <div class="builds-bar">
+    <input type="text" id="buildName" placeholder="Build name…" maxlength="40">
+    <button class="ghost" id="saveBuildBtn">Save build</button>
+    <select id="savedBuilds"><option value="">— saved builds —</option></select>
+    <button class="ghost" id="loadBuildBtn">Load</button>
+    <button class="ghost" id="deleteBuildBtn">Delete</button>
+  </div>
+
+  <div class="controls">
+    <label class="opt"><input type="checkbox" id="freeSmalls"> Treat Small gems as free (farmed, cost 0)</label>
+    <label class="opt"><input type="checkbox" id="fewestClicks"> Fewest clicks (batch into triple/double buds)</label>
+    <button id="calcBtn" disabled>Loading solver…</button>
+    <button class="ghost" id="clearBtn">Clear</button>
+  </div>
+
+  <div id="out"></div>
+
+  <footer><span id="version"></span></footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
