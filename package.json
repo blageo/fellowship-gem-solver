@@ -7,7 +7,8 @@
   "scripts": {
     "serve": "python3 -m http.server 8000",
     "parity": "node tools/parity.mjs --n 500 --seed 12345",
-    "browser-check": "node tools/browser_check.mjs"
+    "browser-check": "node tools/browser_check.mjs",
+    "gear-test": "node tools/gear_test.mjs"
   },
   "keywords": [],
   "author": "",
