@@ -94,13 +94,15 @@ export function computeUpgradeCost(current, target) {
     }
   }
 
-  // --- random stats: no documented reroll mechanism for stat *type* exists,
-  // only for modifier-slot categories. Flag unresolved wants instead of
-  // fabricating a cost. ---
+  // --- random stats: rolled once when the item drops (roll 1 at green,
+  // roll 2 at yellow+) and can never be changed by any means — unlike
+  // modifier slots, there is no souldust that touches them at all. A wanted
+  // stat the current item doesn't already have is therefore not a cost to
+  // compute; it's a hard blocker requiring a different item. ---
   const currentStatTypes = current.randomStats.map((r) => r.stat);
   const unresolvedRandomStats = (target.randomStats ?? []).filter((s) => !currentStatTypes.includes(s));
   if (unresolvedRandomStats.length) {
-    notes.push(`random stat type(s) [${unresolvedRandomStats.join(", ")}] cannot be targeted by any known reroll mechanic.`);
+    notes.push(`random stat(s) [${unresolvedRandomStats.join(", ")}] are rolled once at drop and can never be changed — this item can't reach that target; a different item is required.`);
   }
 
   // --- trait tree path: rolled on drop, not rerollable. Feasibility check only. ---

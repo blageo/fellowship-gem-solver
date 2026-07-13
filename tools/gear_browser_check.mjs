@@ -55,7 +55,7 @@ try {
   // the target should cost only the rarity upgrade, no Legendary Souldust.
   await page.selectOption("#slotSelect", "shoulders"); // fresh, unconfigured slot
   await page.selectOption("#cur_rarity", "blue");
-  await page.check("#cur_stat_haste");
+  await page.check("#cur_stat_row0_haste");
   await page.selectOption("#cur_modcat_0", "majorTrait");
   await page.selectOption("#cur_modid_0", "Martial Initiative");
   await page.selectOption("#tgt_minRarity", "purple");
@@ -96,6 +96,39 @@ try {
   await page.selectOption("#slotSelect", "helm");
   const row2Disabled = await page.evaluate(() => document.getElementById("cur_modid_2").disabled);
   if (!row2Disabled) fail("row 2's id field should stay disabled after switching slots away and back");
+
+  // --- random stat roll 2 is gated behind yellow+, and each roll is a
+  // mutually-exclusive radio group (can't pick more than one per roll) ---
+  await page.selectOption("#slotSelect", "bracers");
+  await page.selectOption("#cur_rarity", "blue");
+  let row2Radio = await page.evaluate(() => document.getElementById("cur_stat_row1_haste").disabled);
+  if (!row2Radio) fail("roll 2 should be disabled below yellow rarity");
+  await page.check("#cur_stat_row0_haste");
+  await page.selectOption("#cur_rarity", "yellow");
+  row2Radio = await page.evaluate(() => document.getElementById("cur_stat_row1_haste").disabled);
+  if (row2Radio) fail("roll 2 should be enabled at yellow+ rarity");
+  await page.check("#cur_stat_row1_expertise");
+  const rollValues = await page.evaluate(() => ({
+    row0: document.querySelector('input[name="cur_stat_row0"]:checked')?.dataset.stat,
+    row1: document.querySelector('input[name="cur_stat_row1"]:checked')?.dataset.stat,
+  }));
+  console.log("current item rolls:", rollValues);
+  if (rollValues.row0 !== "haste" || rollValues.row1 !== "expertise") fail(`expected roll1=haste, roll2=expertise, got ${JSON.stringify(rollValues)}`);
+  // picking a different stat within the same roll deselects the previous one
+  await page.check("#cur_stat_row0_spirit");
+  const hasteStillChecked = await page.evaluate(() => document.getElementById("cur_stat_row0_haste").checked);
+  if (hasteStillChecked) fail("roll 1 radio group should be mutually exclusive");
+
+  // dropping back below yellow clears roll 2's selection
+  await page.selectOption("#cur_rarity", "blue");
+  const row1Cleared = await page.evaluate(() => document.getElementById("cur_stat_row1_expertise").checked);
+  if (row1Cleared) fail("roll 2's selection should clear when dropping below yellow rarity");
+
+  // --- target's wanted-stats checkboxes cap at 2 ---
+  await page.check("#tgt_stat_haste");
+  await page.check("#tgt_stat_expertise");
+  const thirdDisabled = await page.evaluate(() => document.getElementById("tgt_stat_spirit").disabled);
+  if (!thirdDisabled) fail("target should not allow selecting more than 2 wanted random stats");
 
   // --- save/load round trip ---
   await page.fill("#buildName", "playwright-smoke-build");

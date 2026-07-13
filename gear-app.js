@@ -52,8 +52,63 @@ function populateStaticSelects() {
   fillSelect("tgt_minRarity", RARITIES, { blankLabel: "— no requirement —" });
 }
 
-// --- random stat checkboxes --------------------------------------------
-function renderStatCheckboxes(containerId, prefix) {
+// --- random stats -----------------------------------------------------
+// Current item: every item has a "roll 1" stat from the moment it's green;
+// "roll 2" is only added at yellow+ (and, if it doesn't already exist, floods
+// a duplicate of roll 1 — see the "Flooding" rule). Each roll is exactly one
+// of the 6 stat types, so each row is a radio group (mutually exclusive by
+// construction), not a checkbox list. Row 2 is disabled/cleared below yellow.
+function renderCurrentStatRows(containerId) {
+  const box = document.getElementById(containerId);
+  box.innerHTML = "";
+  const rowLabels = ["Roll 1", "Roll 2 (yellow+ only)"];
+  for (let row = 0; row < 2; row++) {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "stat-row";
+    const label = document.createElement("span");
+    label.className = "stat-row-label";
+    label.textContent = rowLabels[row] + ": ";
+    rowDiv.appendChild(label);
+    for (const stat of RANDOM_STAT_TYPES) {
+      const optLabel = document.createElement("label");
+      optLabel.className = "opt";
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `cur_stat_row${row}`;
+      input.id = `cur_stat_row${row}_${stat}`;
+      input.dataset.stat = stat;
+      optLabel.appendChild(input);
+      optLabel.append(" " + stat);
+      rowDiv.appendChild(optLabel);
+    }
+    box.appendChild(rowDiv);
+  }
+}
+
+function gatherCurrentStats() {
+  const stats = [];
+  for (let row = 0; row < 2; row++) {
+    const checked = document.querySelector(`input[name="cur_stat_row${row}"]:checked`);
+    if (checked && !checked.disabled) stats.push(checked.dataset.stat);
+  }
+  return stats;
+}
+
+// `stats` is index-aligned (stats[0] -> row 0, stats[1] -> row 1); rows
+// beyond what's unlocked stay unchecked regardless (their radios are disabled).
+function setCurrentStats(stats) {
+  for (let row = 0; row < 2; row++) {
+    document.querySelectorAll(`input[name="cur_stat_row${row}"]`).forEach((r) => {
+      r.checked = !r.disabled && r.dataset.stat === stats[row];
+    });
+  }
+}
+
+// Target: an unordered "wanted" set (up to 2 — there's no cost model for
+// *which* roll a stat lands in, only whether the item ends up having it), so
+// plain checkboxes are enough; just cap the count at 2 since only 2 rolls
+// ever exist regardless of the target's rarity.
+function renderTargetStatCheckboxes(containerId) {
   const box = document.getElementById(containerId);
   box.innerHTML = "";
   for (const stat of RANDOM_STAT_TYPES) {
@@ -61,12 +116,32 @@ function renderStatCheckboxes(containerId, prefix) {
     label.className = "opt";
     const input = document.createElement("input");
     input.type = "checkbox";
-    input.id = `${prefix}_stat_${stat}`;
+    input.id = `tgt_stat_${stat}`;
     input.dataset.stat = stat;
+    input.addEventListener("change", () => enforceTargetStatCap(containerId));
     label.appendChild(input);
     label.append(" " + stat);
     box.appendChild(label);
   }
+}
+
+function enforceTargetStatCap(containerId) {
+  const boxes = [...document.querySelectorAll(`#${containerId} input[type=checkbox]`)];
+  const checkedCount = boxes.filter((b) => b.checked).length;
+  for (const b of boxes) b.disabled = !b.checked && checkedCount >= 2;
+}
+
+function gatherTargetStats() {
+  return [...document.querySelectorAll("#tgt_randomStats input[type=checkbox]")]
+    .filter((b) => b.checked)
+    .map((b) => b.dataset.stat);
+}
+
+function setTargetStats(stats) {
+  document.querySelectorAll("#tgt_randomStats input[type=checkbox]").forEach((b) => {
+    b.checked = stats.includes(b.dataset.stat);
+  });
+  enforceTargetStatCap("tgt_randomStats");
 }
 
 // --- modifier slot rows --------------------------------------------------
@@ -172,10 +247,15 @@ function applyLocks() {
     // happened to be (it gets replaced wholesale on category change).
     document.getElementById(`cur_modid_${i}`).disabled = beyondRarity || !cat.value;
   }
-  // Random stat *count* is capped by rarity (1 below yellow, 2 at/above), but
-  // any of the 6 types can be that roll — there's no positional mapping like
-  // modifier slots have, so we don't disable specific checkboxes here.
-  // makeGearItem() throws if too many are checked; calc() surfaces that.
+  // Roll 2 only exists at yellow+; disable (and clear) its whole radio group
+  // otherwise so it can't hold a lingering selection from a higher rarity.
+  const row2Locked = unlock.randomStats < 2;
+  const row2Radios = document.querySelectorAll('input[name="cur_stat_row1"]');
+  row2Radios.forEach((r) => {
+    r.disabled = row2Locked;
+    if (row2Locked) r.checked = false;
+  });
+  row2Radios[0]?.closest(".stat-row")?.classList.toggle("locked", row2Locked);
 }
 
 function updateWeaponNeckNote(slot) {
@@ -213,18 +293,6 @@ function setModifierRows(prefix, rows) {
   }
 }
 
-function gatherStats(prefix) {
-  return [...document.querySelectorAll(`#${prefix}_randomStats input[type=checkbox]`)]
-    .filter((b) => b.checked && !b.disabled)
-    .map((b) => b.dataset.stat);
-}
-
-function setStats(prefix, stats) {
-  document.querySelectorAll(`#${prefix}_randomStats input[type=checkbox]`).forEach((b) => {
-    b.checked = !b.disabled && stats.includes(b.dataset.stat);
-  });
-}
-
 function stashActiveSlotForm() {
   const slotData = buildState.slots[activeSlot];
   slotData.current = {
@@ -232,12 +300,12 @@ function stashActiveSlotForm() {
     setName: document.getElementById("setName").value.trim(),
     rarity: document.getElementById("cur_rarity").value,
     league: document.getElementById("cur_league").value,
-    randomStats: gatherStats("cur"),
+    randomStats: gatherCurrentStats(),
     modifierSlots: gatherModifierRows("cur"),
   };
   slotData.target = {
     minRarity: document.getElementById("tgt_minRarity").value,
-    randomStats: gatherStats("tgt"),
+    randomStats: gatherTargetStats(),
     modifierSlots: gatherModifierRows("tgt"),
   };
 }
@@ -252,9 +320,9 @@ function loadSlotIntoForm(slot) {
   document.getElementById("tgt_minRarity").value = target.minRarity;
 
   applyLocks();
-  setStats("cur", current.randomStats);
+  setCurrentStats(current.randomStats);
   setModifierRows("cur", current.modifierSlots);
-  setStats("tgt", target.randomStats);
+  setTargetStats(target.randomStats);
   setModifierRows("tgt", target.modifierSlots);
   applyLocks(); // setModifierRows("cur", ...) replaces the id-field DOM nodes,
                 // which drops the disabled state the first applyLocks() call
@@ -442,8 +510,8 @@ function deleteBuild() {
 
 // --- boot -----------------------------------------------------------------
 populateStaticSelects();
-renderStatCheckboxes("cur_randomStats", "cur");
-renderStatCheckboxes("tgt_randomStats", "tgt");
+renderCurrentStatRows("cur_randomStats");
+renderTargetStatCheckboxes("tgt_randomStats");
 renderModifierRows("cur_modifierSlots", "cur");
 renderModifierRows("tgt_modifierSlots", "tgt");
 loadSlotIntoForm(activeSlot);

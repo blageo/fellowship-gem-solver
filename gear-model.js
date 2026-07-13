@@ -131,6 +131,7 @@ export function makeTargetGearItem({
   minRarity, randomStats = [], modifierSlots = [], traitPath, neckWanted = [],
 } = {}) {
   if (minRarity !== undefined) assert(RARITIES.includes(minRarity), `unknown rarity: ${minRarity}`);
+  assert(randomStats.length <= 2, "randomStats: max 2 (only roll 1 and roll 2 ever exist)");
   for (const s of randomStats) assert(RANDOM_STAT_TYPES.includes(s), `unknown random stat: ${s}`);
   assert(modifierSlots.length <= 3, "modifierSlots: max 3");
   // A null/undefined entry means "no requirement for this slot position" —
