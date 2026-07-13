@@ -28,7 +28,7 @@ function buildGrid(which) {
   for (const t of TIERS) h += `<th class="col">${t}</th>`;
   h += "</tr>";
   for (const c of COLORS) {
-    h += `<tr><td class="rowlab"><span class="dot" style="background:${HEX[c]}"></span>${c}</td>`;
+    h += `<tr><td class="rowlab" data-color="${c}"><span class="dot" style="background:${HEX[c]}"></span>${c}</td>`;
     for (const t of TIERS) {
       h += `<td><input type="number" min="0" step="1" id="${which}_${c}_${t}" placeholder="0"></td>`;
     }
@@ -114,6 +114,40 @@ function deleteBuild() {
   saveBuilds(loadBuilds().filter((b) => b.name !== name));
   document.getElementById("buildName").value = "";
   refreshBuildSelect();
+}
+
+// --- collapsible colour rows ----------------------------------------------
+// Clicking a colour label collapses/expands its tier cells. On narrow screens
+// rows start collapsed so the full 6×4 grid is not shown all at once.
+function addRowToggles(which) {
+  const narrow = window.matchMedia("(max-width: 620px)").matches;
+  for (const c of COLORS) {
+    const label = document.querySelector(`#grid-${which} td[data-color="${c}"]`);
+    if (!label) continue;
+    const row = label.closest("tr");
+    if (narrow) row.classList.add("collapsed");
+    label.addEventListener("click", () => row.classList.toggle("collapsed"));
+  }
+}
+
+// --- swipe-to-increment on touch devices ----------------------------------
+// Swipe up on a number input increments its value; swipe down decrements.
+// Prevents page scroll while a vertical swipe is in progress on an input.
+function addSwipeIncrement() {
+  document.querySelectorAll("input[type=number]").forEach((el) => {
+    let startY = null;
+    el.addEventListener("touchstart", (e) => { startY = e.touches[0].clientY; }, { passive: true });
+    el.addEventListener("touchmove", (e) => {
+      if (startY !== null && Math.abs(startY - e.touches[0].clientY) > 8) e.preventDefault();
+    }, { passive: false });
+    el.addEventListener("touchend", (e) => {
+      if (startY === null) return;
+      const dy = startY - e.changedTouches[0].clientY;
+      startY = null;
+      if (Math.abs(dy) < 15) return;
+      el.value = Math.max(0, (parseInt(el.value, 10) || 0) + (dy > 0 ? 1 : -1));
+    });
+  });
 }
 
 // --- keyboard navigation --------------------------------------------------
@@ -308,6 +342,9 @@ buildGrid("target");
 buildGrid("have");
 addKeyboardNav("target");
 addKeyboardNav("have");
+addRowToggles("target");
+addRowToggles("have");
+addSwipeIncrement();
 refreshBuildSelect();
 document.getElementById("saveBuildBtn").addEventListener("click", saveBuild);
 document.getElementById("loadBuildBtn").addEventListener("click", loadBuild);

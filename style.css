@@ -81,3 +81,21 @@ button.ghost:hover { background: #16232f; color: #cdd9e4; }
 .sharebar a:hover { text-decoration: underline; }
 .copied { color: #9ad07a; font-size: 13px; }
 footer { margin-top: 32px; color: #4a6070; font-size: 12px; text-align: center; }
+
+/* --- mobile ------------------------------------------------------------ */
+/* Colour rows are collapsible on all screens via .rowlab click, but on narrow
+   screens rows start collapsed so the grid is not overwhelming. */
+tr.collapsed td:not(.rowlab) { display: none; }
+.rowlab { cursor: pointer; user-select: none; }
+.rowlab::after { content: " ▾"; font-size: 10px; color: #4a6070; }
+tr.collapsed .rowlab::after { content: " ▸"; }
+
+@media (max-width: 620px) {
+  body { padding: 16px; }
+  .grids { gap: 12px; }
+  .panel { padding: 12px; min-width: 0; }
+  input[type=number] { width: 48px; padding: 8px 2px; font-size: 15px; }
+  .builds-bar input[type=text] { width: 120px; }
+  .controls { gap: 12px; }
+  button { padding: 10px 16px; }
+}
