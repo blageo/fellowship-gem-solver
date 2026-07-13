@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fellowship Gear Upgrade Planner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="back-link" href="index.html">&larr; All tools</a>
+  <h1>Fellowship Gear Upgrade Planner</h1>
+  <p class="sub">Pick a slot, describe what you have and what you want, and see the expected Souldust/Marks cost. Runs entirely in your browser.</p>
+
+  <div class="controls">
+    <label class="opt">Slot <select id="slotSelect"></select></label>
+    <label class="opt">Item type <select id="itemType"></select></label>
+    <label class="opt" id="setNameWrap" style="display:none">Set name <input type="text" id="setName" maxlength="40"></label>
+  </div>
+
+  <p id="weaponNeckNote" class="muted" style="display:none"></p>
+
+  <div class="grids">
+    <div class="panel">
+      <h2>Current item</h2>
+      <label class="opt">Rarity <select id="cur_rarity"></select></label>
+      <label class="opt">League <select id="cur_league"></select></label>
+      <h3>Random stats</h3>
+      <div id="cur_randomStats" class="stat-list"></div>
+      <h3>Modifier slots</h3>
+      <div id="cur_modifierSlots" class="modslot-list"></div>
+    </div>
+    <div class="panel">
+      <h2>Target</h2>
+      <label class="opt">Minimum rarity <select id="tgt_minRarity"></select></label>
+      <h3>Random stats wanted</h3>
+      <div id="tgt_randomStats" class="stat-list"></div>
+      <h3>Modifier slots wanted</h3>
+      <div id="tgt_modifierSlots" class="modslot-list"></div>
+    </div>
+  </div>
+
+  <div class="builds-bar">
+    <input type="text" id="buildName" placeholder="Build name…" maxlength="40">
+    <button class="ghost" id="saveBuildBtn">Save build</button>
+    <select id="savedBuilds"><option value="">— saved builds —</option></select>
+    <button class="ghost" id="loadBuildBtn">Load</button>
+    <button class="ghost" id="deleteBuildBtn">Delete</button>
+    <label class="opt">Linked gem build <select id="gemBuildLink"><option value="">— none —</option></select></label>
+  </div>
+
+  <div class="controls">
+    <button id="calcBtn">Calculate</button>
+    <button class="ghost" id="clearBtn">Clear slot</button>
+  </div>
+
+  <div id="out"></div>
+
+  <footer><span id="version"></span></footer>
+  <script type="module" src="gear-app.js"></script>
+</body>
+</html>

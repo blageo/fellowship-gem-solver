@@ -42,6 +42,10 @@ input[type=number]:focus { outline: none; border-color: #e8c877; }
 .controls { display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
             margin: 12px 0 4px; }
 label.opt { color: #b9c6d3; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+select, .controls input[type=text] {
+  background: #0e1a24; color: #e6edf3; border: 1px solid #2c4257;
+  border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
 button {
   background: #e8c877; color: #14202b; border: none; border-radius: 8px;
   padding: 11px 22px; font-size: 15px; font-weight: 650; cursor: pointer;
@@ -81,6 +85,34 @@ button.ghost:hover { background: #16232f; color: #cdd9e4; }
 .sharebar a:hover { text-decoration: underline; }
 .copied { color: #9ad07a; font-size: 13px; }
 footer { margin-top: 32px; color: #4a6070; font-size: 12px; text-align: center; }
+.back-link { color: #8ba0b3; font-size: 13px; text-decoration: none; display: inline-block; margin-bottom: 10px; }
+.back-link:hover { color: #e8c877; }
+
+/* --- landing page ------------------------------------------------------- */
+.landing { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 8px; }
+.tool-card {
+  display: block; text-decoration: none; color: inherit;
+  background: #16232f; border: 1px solid #26384a; border-radius: 10px;
+  padding: 20px 22px; flex: 1 1 280px; min-width: 240px;
+}
+.tool-card:hover { border-color: #e8c877; }
+.tool-card h2 { margin: 0 0 8px; font-size: 17px; color: #e8c877; }
+.tool-card p { margin: 0; color: #b9c6d3; font-size: 13.5px; }
+
+/* --- gear planner --------------------------------------------------------- */
+.panel h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase;
+            letter-spacing: .5px; color: #9db1c4; font-weight: 600; }
+.stat-list { display: flex; gap: 14px; flex-wrap: wrap; }
+.modslot-list { display: flex; flex-direction: column; gap: 8px; }
+.modslot-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #b9c6d3; }
+.modslot-row select { background: #0e1a24; color: #e6edf3; border: 1px solid #2c4257;
+                       border-radius: 6px; padding: 5px 6px; font-size: 13px; }
+.modslot-row input[type=text] { background: #0e1a24; color: #e6edf3; border: 1px solid #2c4257;
+                                 border-radius: 6px; padding: 5px 8px; font-size: 13px; flex: 1; }
+.modslot-row.locked { opacity: .4; }
+.legendary-warn { color: #ff8b8b; font-weight: 600; font-size: 13px; margin: 8px 0; }
+.notes { color: #8ba0b3; font-size: 12.5px; margin: 8px 0 0; padding-left: 18px; }
+.notes li { margin: 2px 0; }
 
 /* --- mobile ------------------------------------------------------------ */
 /* Colour rows are collapsible on all screens via .rowlab click, but on narrow
