@@ -66,3 +66,4 @@ button.ghost:hover { background: #16232f; color: #cdd9e4; }
 .sharebar a { color: #e8c877; font-size: 13px; cursor: pointer; text-decoration: none; }
 .sharebar a:hover { text-decoration: underline; }
 .copied { color: #9ad07a; font-size: 13px; }
+footer { margin-top: 32px; color: #4a6070; font-size: 12px; text-align: center; }

@@ -2,6 +2,7 @@
 // file builds the grids, loads highs-js, solves locally (no backend), renders the
 // plan, and keeps a shareable build in the URL.
 import { COLORS, TIERS, GEM_HEX, makeGrid, solve, planToDict } from "./solver.js";
+import { SEASON, PATCH } from "./game-constants.js";
 
 const HEX = GEM_HEX;
 let highs = null;
@@ -223,6 +224,7 @@ async function copyShareLink() {
 // --- boot -----------------------------------------------------------------
 buildGrid("target");
 buildGrid("have");
+document.getElementById("version").textContent = `${SEASON} · patch ${PATCH}`;
 document.getElementById("clearBtn").addEventListener("click", clearAll);
 const hasTarget = hydrateFromURL();
 

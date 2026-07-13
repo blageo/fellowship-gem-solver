@@ -7,37 +7,15 @@
 // the Python oracle exactly — including the full shopping list, thanks to the
 // TIE_EPS tie-breaker below.
 
-// --- game constants -------------------------------------------------------
-export const COLORS = ["ruby", "amethyst", "topaz", "emerald", "sapphire", "diamond"];
-export const TIERS = ["small", "large", "splendid", "flawless"]; // index 0..3
-export const T = Object.fromEntries(TIERS.map((name, i) => [name, i]));
+import {
+  COLORS, TIERS, T, FUSE_COST, TRANSMUTE_COST, GODSTONE_COST,
+  DEFAULT_SMALL_COST, TRANS_TIE_BASE, TRANS_TIE_STEP, GEM_HEX,
+} from "./game-constants.js";
 
-export const FUSE_COST = { 0: 5, 1: 10, 2: 15 }; // aether marks for tier t -> t+1
-export const TRANSMUTE_COST = 15;                // arcane, guaranteed targeted
-export const GODSTONE_COST = { defender: 5, hero: 10, legend: 15 };
-export const DEFAULT_SMALL_COST = 10;            // bud cost per extra small (aether + godstone)
-
-// Lexicographic tie-breaker on transmute variables; mirrors gem_solver.py. Marks
-// are integer multiples of 5, so these tiny per-transmute weights never trade a
-// genuine Marks saving — they only pick among equal-Marks optima:
-//   * TRANS_TIE_BASE per transmute penalises transmuting, so the solver never
-//     "builds a wrong colour then transmutes" and salvage transmutes stay minimal;
-//   * TRANS_TIE_STEP * (enumeration index) gives every transmute variable a
-//     distinct cost, so a salvaged gem's *destination* colour is chosen
-//     deterministically — the sole remaining source of tied optima. This makes
-//     the whole plan (not just the total) match the Python oracle, which uses the
-//     same weights and the same HiGHS engine.
-// Weights live only on the ~120 transmute variables (never the large bud counts),
-// and BASE + 119*STEP stays far below the 5-Mark minimum gap for any realistic
-// transmute count. total_marks is recomputed from the decoded plan, so these
-// weights never leak into the reported total.
-export const TRANS_TIE_BASE = 0.02;
-export const TRANS_TIE_STEP = 1e-4;
-
-// gem display colors for the UI
-export const GEM_HEX = {
-  ruby: "#e2445c", amethyst: "#a259d9", topaz: "#e0a11b",
-  emerald: "#35c26b", sapphire: "#3d7fe0", diamond: "#cfd8e6",
+// Re-export constants so existing importers (app.js, parity harness) don't break.
+export {
+  COLORS, TIERS, T, FUSE_COST, TRANSMUTE_COST, GODSTONE_COST,
+  DEFAULT_SMALL_COST, TRANS_TIE_BASE, TRANS_TIE_STEP, GEM_HEX,
 };
 
 // closed-form "build one gem of any color from scratch" marks cost. color-agnostic.
