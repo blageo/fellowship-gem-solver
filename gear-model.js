@@ -133,7 +133,11 @@ export function makeTargetGearItem({
   if (minRarity !== undefined) assert(RARITIES.includes(minRarity), `unknown rarity: ${minRarity}`);
   for (const s of randomStats) assert(RANDOM_STAT_TYPES.includes(s), `unknown random stat: ${s}`);
   assert(modifierSlots.length <= 3, "modifierSlots: max 3");
+  // A null/undefined entry means "no requirement for this slot position" —
+  // it's kept (not stripped) so a requirement on e.g. only slot 3 stays at
+  // index 2 instead of silently shifting to index 0.
   for (const m of modifierSlots) {
+    if (!m) continue;
     assert(Object.keys(MODIFIER_CATEGORIES).includes(m.category), `unknown modifier category: ${m.category}`);
   }
   if (traitPath !== undefined) {
@@ -142,7 +146,7 @@ export function makeTargetGearItem({
   return {
     minRarity,
     randomStats: [...randomStats],
-    modifierSlots: modifierSlots.map((m) => ({ ...m })),
+    modifierSlots: modifierSlots.map((m) => (m ? { ...m } : null)),
     traitPath: traitPath ? [...traitPath] : undefined,
     neckWanted: [...neckWanted],
   };

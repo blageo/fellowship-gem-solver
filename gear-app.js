@@ -281,7 +281,9 @@ function toTargetGearItem(target) {
   return makeTargetGearItem({
     minRarity: target.minRarity || undefined,
     randomStats: target.randomStats,
-    modifierSlots: target.modifierSlots.filter(Boolean),
+    // Keep null entries (unlike toGearItem's current-item side) — a
+    // requirement on only slot 3 must stay at index 2, not compact to index 0.
+    modifierSlots: target.modifierSlots,
   });
 }
 

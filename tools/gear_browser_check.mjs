@@ -50,7 +50,28 @@ try {
   const hasLegendaryWarn = await page.$("#out .legendary-warn");
   if (hasLegendaryWarn) fail("unexpected legendary warning for a same-category reroll");
 
-  // --- wrong category -> legendary souldust warning ---
+  // --- flooding regression: a blue helm with Martial Initiative in slot 1,
+  // upgraded to purple, floods slot 2 with the same trait — wanting that in
+  // the target should cost only the rarity upgrade, no Legendary Souldust.
+  await page.selectOption("#slotSelect", "shoulders"); // fresh, unconfigured slot
+  await page.selectOption("#cur_rarity", "blue");
+  await page.check("#cur_stat_haste");
+  await page.selectOption("#cur_modcat_0", "majorTrait");
+  await page.selectOption("#cur_modid_0", "Martial Initiative");
+  await page.selectOption("#tgt_minRarity", "purple");
+  await page.selectOption("#tgt_modcat_0", "majorTrait");
+  await page.selectOption("#tgt_modid_0", "Martial Initiative");
+  await page.selectOption("#tgt_modcat_1", "majorTrait");
+  await page.selectOption("#tgt_modid_1", "Martial Initiative");
+  await page.click("#calcBtn");
+  const floodTotal = (await page.textContent("#out .total")).trim();
+  console.log("flooding total:", floodTotal, "(expect 15 Marks)");
+  if (floodTotal !== "15 Marks") fail(`flooding total ${floodTotal} != "15 Marks"`);
+  if (await page.$("#out .legendary-warn")) fail("flooding a matching trait into slot 2 should not need legendary souldust");
+
+  // --- wrong category -> legendary souldust warning (back on "helm", which
+  // still has the blessing/The Herald + blessing/The Wayfarer setup from above) ---
+  await page.selectOption("#slotSelect", "helm");
   await page.selectOption("#tgt_modcat_0", "gemEssence");
   await page.click("#calcBtn");
   const warnText = await page.textContent("#out .legendary-warn").catch(() => null);

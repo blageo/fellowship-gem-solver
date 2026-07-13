@@ -51,8 +51,12 @@ export function computeUpgradeCost(current, target) {
   if (target.minRarity) {
     requiredRank = Math.max(requiredRank, RARITY_RANK[target.minRarity]);
   }
-  if (target.modifierSlots?.length) {
-    requiredRank = Math.max(requiredRank, rankForSlotCount(target.modifierSlots.length));
+  // modifierSlots may be sparse (null = "no requirement" at that index, kept
+  // so a slot-3-only requirement stays at index 2) — the rarity needed is
+  // driven by the *highest wanted index*, not the array's raw length.
+  const wantedSlotCount = 1 + (target.modifierSlots ?? []).reduce((max, m, i) => (m ? i : max), -1);
+  if (wantedSlotCount > 0) {
+    requiredRank = Math.max(requiredRank, rankForSlotCount(wantedSlotCount));
   }
   if (target.randomStats?.length) {
     requiredRank = Math.max(requiredRank, rankForStatCount(target.randomStats.length));
@@ -72,16 +76,10 @@ export function computeUpgradeCost(current, target) {
   for (let i = 0; i < (target.modifierSlots?.length ?? 0); i++) {
     const wanted = target.modifierSlots[i];
     if (!wanted) continue;
-    const existing = current.modifierSlots[i];
+    const landed = landedModifierAt(current.modifierSlots, i);
 
-    // Slot i doesn't exist on the current item yet: it will be created by the
-    // rarity upgrade above (fresh roll for slot 0, flooded duplicate of an
-    // earlier slot for slots 1/2). Either way its landed category isn't
-    // guaranteed to match, so treat it like a wrong-category slot below.
-    const landedCategory = existing ? existing.category : undefined;
-
-    if (landedCategory === wanted.category) {
-      if (wanted.modifierId && existing.modifierId !== wanted.modifierId) {
+    if (landed && landed.category === wanted.category) {
+      if (wanted.modifierId && landed.modifierId !== wanted.modifierId) {
         rerolls5Mark += MODIFIER_CATEGORIES[wanted.category].poolSize;
       }
     } else {
@@ -144,6 +142,19 @@ export function computeUpgradeCost(current, target) {
     traitPathAchievable,
     notes,
   };
+}
+
+// What a modifier slot at index `i` will actually be once the item is
+// upgraded to unlock it, given the item's *current* modifierSlots. Slot 0 is
+// a fresh, unpredictable roll if it doesn't exist yet (nothing to duplicate),
+// but slots 1/2 flood — an exact duplicate (category AND modifierId) of the
+// nearest existing lower slot, per the "Flooding" rule in the gear system
+// design. Returns null if there's nothing to predict from (slot 0, not yet
+// rolled).
+function landedModifierAt(modifierSlots, i) {
+  if (modifierSlots[i]) return modifierSlots[i];
+  if (i === 0) return null;
+  return landedModifierAt(modifierSlots, i - 1);
 }
 
 // Does `chosen` (current tree's already-locked-in choices, null = not yet
